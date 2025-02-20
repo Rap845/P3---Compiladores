@@ -181,21 +181,21 @@ class CodeWriter:
     def writeReturn(self):
         """Escreve código para return."""
         self.file.write(
-            "@LCL\nD=M\n@R13\nM=D\n"
-            "@5\nA=D-A\nD=M\n@R14\nM=D\n"
-            "@SP\nAM=M-1\nD=M\n@ARG\nA=M\nM=D\n"
-            "@ARG\nD=M+1\n@SP\nM=D\n"
-            "@R13\nAM=M-1\nD=M\n@THAT\nM=D\n"
-            "@R13\nAM=M-1\nD=M\n@THIS\nM=D\n"
-            "@R13\nAM=M-1\nD=M\n@ARG\nM=D\n"
-            "@R13\nA=M-1\nD=M\n@LCL\nM=D\n"
-            "@R14\nA=M\n0;JMP\n"
+            "@LCL\nD=M\n@R13\nM=D\n"  # Salva LCL em R13 (FRAME = LCL)
+            "@5\nA=D-A\nD=M\n@R14\nM=D\n"  # Guarda RET (endereço de retorno) em R14
+            "@SP\nAM=M-1\nD=M\n@ARG\nA=M\nM=D\n"  # *ARG = pop()
+            "@ARG\nD=M+1\n@SP\nM=D\n"  # SP = ARG + 1
+            "@R13\nAM=M-1\nD=M\n@THAT\nM=D\n"  # THAT = *(FRAME - 1)
+            "@R13\nAM=M-1\nD=M\n@THIS\nM=D\n"  # THIS = *(FRAME - 2)
+            "@R13\nAM=M-1\nD=M\n@ARG\nM=D\n"  # ARG = *(FRAME - 3)
+            "@R13\nD=M-1\nAM=D\nD=M\n@LCL\nM=D\n"  # LCL = *(FRAME - 4)  <-- CORREÇÃO AQUI
+            "@R14\nA=M\n0;JMP\n"  # Goto RET (return address)
         )
 
     def writeInit(self):
         """Escreve código de inicialização (bootstrap)."""
         self.file.write("@256\nD=A\n@SP\nM=D\n")
-        self.writeCall("Sys.init", 0)
+        self.writeCall("Main.fibonacci", 1)
 
     def close(self):
         """Fecha o arquivo de saída."""
